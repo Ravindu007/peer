@@ -1,23 +1,30 @@
-const {PeerServer} = require("peer");
+const { PeerServer } = require("peer");
 
 const port = 9001;
+const connectedClients = [];
 
-const peerServer =  PeerServer({
+const peerServer = PeerServer({
     port: port,
     path: "/",
 });
 
-let peerCount = 0;
-
 // Start the PeerServer
 peerServer.on('connection', (client) => {
     console.log(`Client connected: ${client.getId()}`);
-    peerCount = peerCount + 1;
-    console.log("Total peers in the server: ", peerCount)
+    connectedClients.push(client);
+    logTotalPeers();
 });
 
 peerServer.on('disconnect', (client) => {
     console.log(`Client disconnected: ${client.getId()}`);
-    peerCount =- peerCount - 1 ;
-    console.log("Total peers in the server: ", peerCount)
+    const index = connectedClients.indexOf(client);
+    if (index !== -1) {
+        connectedClients.splice(index, 1);
+    }
+    logTotalPeers();
 });
+
+function logTotalPeers() {
+    const totalPeers = connectedClients.length;
+    console.log(`Total peers connected: ${totalPeers}`);
+}
